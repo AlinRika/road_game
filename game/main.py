@@ -1,61 +1,128 @@
 import asyncio
 import sys
+import time
 
-import pygame
+import pygame as pg
+from pygame.font import Font
 
-COLORS = [
-    ['aliceblue', 'antiquewhite4', 'aquamarine4'],
-    ['blueviolet', 'chocolate1', 'darksalmon'],
-]
-FPS = 25
+from aliens import Alien
+from helper import load_image
+from player import Player
+import random
+from road import Road
+
+
+FPS = 40
+SCREEN_SIZE = (1280, 720)
+
+START_ROAD_X = 160
+START_ROAD_Y = 0
+NUMBER_ROADS = 4
+
+ALIEN_RELOAD = 40  # frames between new aliens
+ALIEN_ODDS = 15  # chances a new alien appears
+START_ALIEN_COORDINATES = ((160, -71), (240, 720))
+
+OFFSET = 320
 
 
 async def main():
-    pygame.init()
-    screen: pygame.Surface = pygame.display.set_mode((1200, 800))
-    clock = pygame.time.Clock()
+    pg.init()
+    screen: pg.Surface = pg.display.set_mode(SCREEN_SIZE)
+    clock = pg.time.Clock()
 
-    color_index_y = 0
-    color_index_x = 0
-    color_len_y = len(COLORS)
-    color_len_x = len(COLORS[0])
+    font = Font(None, 36)
 
-    while True:  # EVENT LOOP
-        for event in pygame.event.get():
-            if not event.type == pygame.KEYUP:
-                continue
+    background = pg.Surface(screen.get_size()).convert()
+    background_imgs = [load_image("background3.png"), load_image("dead.gif")]
+    background.blit(background_imgs[0], (0, 0))
 
-            if event.key == pygame.K_a:
-                color_index_x = (color_index_x - 1) % color_len_x
-                new_color = COLORS[color_index_y][color_index_x]
-                screen.fill(new_color)
-                pygame.display.update()
+    screen.fill('black')
 
-            if event.key == pygame.K_d:
-                color_index_x = (color_index_x + 1) % color_len_x
-                new_color = COLORS[color_index_y][color_index_x]
-                screen.fill(new_color)
-                pygame.display.update()
+    alienreload = [
+        [random.randint(0, ALIEN_RELOAD), random.randint(0, ALIEN_RELOAD)]
+        for _ in range(4)
+    ]
 
-            if event.key == pygame.K_s:
-                color_index_y = (color_index_y - 1) % color_len_y
-                new_color = COLORS[color_index_y][color_index_x]
-                screen.fill(new_color)
-                pygame.display.update()
+    all_objects = pg.sprite.RenderUpdates()
+    aliens = pg.sprite.Group()
+    roads = pg.sprite.Group()
 
-            if event.key == pygame.K_w:
-                color_index_y = (color_index_y + 1) % color_len_y
-                new_color = COLORS[color_index_y][color_index_x]
-                screen.fill(new_color)
-                pygame.display.update()
+    for i in range(NUMBER_ROADS):
+        Road(START_ROAD_X + OFFSET * i, START_ROAD_Y, roads, all_objects)
 
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
+    player = Player(all_objects)
 
-        clock.tick(FPS)  # Frames per second, 25 fps
+    score = 0
+    border_for_score = OFFSET
+
+    while True:
+
+        for event in pg.event.get():
+            if event.type == pg.QUIT:
+                return
+
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_ESCAPE:
+                    return
+
+        keys = pg.key.get_pressed()
+        if keys[pg.K_w]:
+            player.move(up=True)
+        if keys[pg.K_s]:
+            player.move(down=True)
+        if keys[pg.K_a]:
+            player.move(left=True)
+        if keys[pg.K_d]:
+            player.move(right=True)
+
+        screen.blit(background, (0, 0))
+
+        # Create new alien
+        for road_number in range(len(alienreload)):
+            for road_direction in range(len(alienreload[road_number])):
+                if alienreload[road_number][road_direction]:
+                    alienreload[road_number][road_direction] -= 1
+                elif not int(random.random() * ALIEN_ODDS):
+                    start_alien_x, start_alien_y = START_ALIEN_COORDINATES[road_direction]
+                    Alien(
+                        start_alien_x + OFFSET * road_number,
+                        start_alien_y,
+                        road_direction,
+                        aliens, all_objects
+                    )
+                    alienreload[road_number][road_direction] = ALIEN_RELOAD
+
+        all_objects.draw(screen)
+        aliens.update()
+
+        aliens_collided = pg.sprite.spritecollide(player, aliens, False)
+        if aliens_collided:
+            background.blit(background_imgs[1], (0, 0))
+            screen.blit(background, (0, 0))
+            pg.display.update()
+            time.sleep(2)
+            return
+
+        if player.rect.left > border_for_score or (player.rect.x == 0 and border_for_score == screen.get_width()):
+            score += 1
+            border_for_score += OFFSET
+        if border_for_score > screen.get_width():
+            border_for_score = OFFSET
+
+        text = font.render(f'Score: {score}', True, 'black')
+        screen.blit(text, (10, 10))
+
+        for alien in aliens:
+            if alien.fly_out():
+                alien.kill()
+
+        clock.tick(FPS)
+        pg.display.update()
         await asyncio.sleep(0)
 
 
 if __name__ == '__main__':
     asyncio.run(main())
+    pg.quit()
+    sys.exit()

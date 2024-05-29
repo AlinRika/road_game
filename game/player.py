@@ -2,14 +2,13 @@ import pygame as pg
 
 from helper import load_image
 
-
+# Start coordinates for player
 START_PLAYER_X = 55
 START_PLAYER_Y = 325
-HORIZONTAL_OFFSET = 160
-VERTICAL_OFFSET = 90
 
 
 class Player(pg.sprite.Sprite):
+    """Representing the player as a little pink piggy."""
 
     speed = 10
 

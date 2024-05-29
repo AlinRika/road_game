@@ -116,11 +116,10 @@ async def main():
         screen.blit(background, (0, 0))
         all_objects.draw(screen)
         aliens.update()
-        pg.display.update()
-
         # draw the score
         text = font.render(f'Score: {score}', True, 'black')
         screen.blit(text, (10, 10))
+        pg.display.update()
 
         # destruction of aliens that go beyond the playing field
         for alien in aliens:

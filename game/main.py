@@ -60,11 +60,13 @@ async def main():
 
         for event in pg.event.get():
             if event.type == pg.QUIT:
-                return
+                pg.quit()
+                sys.exit()
 
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
-                    return
+                    pg.quit()
+                    sys.exit()
 
         keys = pg.key.get_pressed()
         if keys[pg.K_w]:
@@ -102,7 +104,8 @@ async def main():
             screen.blit(background, (0, 0))
             pg.display.update()
             time.sleep(2)
-            return
+            pg.quit()
+            sys.exit()
 
         if player.rect.left > border_for_score or (player.rect.x == 0 and border_for_score == screen.get_width()):
             score += 1
@@ -117,12 +120,11 @@ async def main():
             if alien.fly_out():
                 alien.kill()
 
-        clock.tick(FPS)
         pg.display.update()
+
+        clock.tick(FPS)
         await asyncio.sleep(0)
 
 
 if __name__ == '__main__':
     asyncio.run(main())
-    pg.quit()
-    sys.exit()

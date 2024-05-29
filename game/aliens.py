@@ -17,6 +17,8 @@ class Alien(pg.sprite.Sprite):
 
         self.image = load_image("alien1.gif")
         self.rect = self.image.get_rect()
+        self.hitbox = self.rect.inflate(-20, -15)
+
         self.rect.x, self.rect.y = calculate_start_object_position(
             START_ALIEN_COORDINATES[self.direction][0],
             START_ALIEN_COORDINATES[self.direction][1],
@@ -33,6 +35,7 @@ class Alien(pg.sprite.Sprite):
 
     def update(self):
         self.rect.y += self.speed
+        self.hitbox.center = self.rect.center
 
     def fly_out(self):
         """return True if alien went beyond the boundary of the playing field"""

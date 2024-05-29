@@ -16,3 +16,9 @@ def calculate_start_object_position(x_coordinate, y_coordinate, offset, number_r
     x_position = x_coordinate + offset * number_road
     y_position = y_coordinate
     return x_position, y_position
+
+
+# this callback function is passed as the `collided`argument to pygame.sprite.spritecollide.
+def collided(sprite, other):
+    """Check if the hitboxes of the two sprites collide."""
+    return sprite.hitbox.colliderect(other.hitbox)

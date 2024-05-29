@@ -14,9 +14,10 @@ class Player(pg.sprite.Sprite):
 
     def __init__(self, *groups):
         pg.sprite.Sprite.__init__(self, *groups)
-        self.image = load_image("player2.gif")
+        self.image = load_image("player1.gif")
         self.image.set_colorkey((255, 255, 255))
         self.rect = self.image.get_rect().move(START_PLAYER_X, START_PLAYER_Y)
+        self.hitbox = self.rect.inflate(-10, -10)
 
         self.scene = pg.display.get_surface().get_rect()
 
@@ -41,5 +42,7 @@ class Player(pg.sprite.Sprite):
                 self.rect.y += 0
             else:
                 self.rect.y -= self.speed
+        self.hitbox.centerx = self.rect.centerx
+        self.hitbox.centery = self.rect.centery
 
 

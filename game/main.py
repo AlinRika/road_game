@@ -7,7 +7,7 @@ import pygame as pg
 from pygame.font import Font
 
 from aliens import Alien
-from helper import load_image
+from helper import load_image, collided
 from player import Player
 from road import Road
 
@@ -32,7 +32,7 @@ async def main():
 
     # set the display
     background = pg.Surface(screen.get_size()).convert()
-    background_imgs = [load_image("background3.png"), load_image("dead.gif")]
+    background_imgs = [load_image("background1.png"), load_image("dead.gif")]
     background.blit(background_imgs[0], (0, 0))
     screen.fill('black')
 
@@ -96,8 +96,9 @@ async def main():
                     alien_reload[number_road][road_direction] = ALIEN_RELOAD
 
         # check a collision between a player and an alien
-        aliens_collided = pg.sprite.spritecollide(player, aliens, False)
+        aliens_collided = pg.sprite.spritecollide(player, aliens,  False, collided)
         if aliens_collided:
+            time.sleep(2)
             background.blit(background_imgs[1], (0, 0))
             screen.blit(background, (0, 0))
             pg.display.update()

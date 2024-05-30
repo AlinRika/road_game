@@ -3,7 +3,7 @@ from pathlib import Path
 import pygame as pg
 
 CURRENT_FOLDER = Path(__file__).parent
-LEN_BACKGROUND_LIST = 3
+NUMBER_BACKGROUNDS = 3
 
 
 def load_image(name):
@@ -20,7 +20,7 @@ def calculate_start_object_position(x_coordinate, y_coordinate, offset, number_r
 
 
 def calculate_background_index(score):
-    return score % LEN_BACKGROUND_LIST
+    return score % NUMBER_BACKGROUNDS
 
 
 # this callback function is passed as the `collided`argument to pygame.sprite.spritecollide.

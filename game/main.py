@@ -1,6 +1,5 @@
 import asyncio
 import sys
-import time
 import random
 
 import pygame as pg
@@ -60,6 +59,8 @@ async def main():
     score = 0
     border_for_score = OFFSET  # boundary that the player must cross in order to get a score +1
 
+    is_dead = False
+
     while True:
 
         for event in pg.event.get():
@@ -99,14 +100,7 @@ async def main():
         # check a collision between a player and an alien
         aliens_collided = pg.sprite.spritecollide(player, aliens,  False, collided)
         if aliens_collided:
-            background.blit(background_imgs[-1], (0, 0))
-            screen.blit(background, (0, 0))
-            text = font.render(f'Your score: {score}', True, 'black')
-            screen.blit(text, (10, 10))
-            pg.display.update()
-            time.sleep(3)
-            pg.quit()
-            sys.exit()
+            is_dead = True
 
         # improve the score
         if player.rect.left > border_for_score or (player.rect.x == 0 and border_for_score == screen.get_width()):
@@ -121,16 +115,25 @@ async def main():
         screen.blit(background, (0, 0))
         all_objects.draw(screen)
         aliens.update()
-        # draw the score
         text = font.render(f'Score: {score}', True, 'black')
         screen.blit(text, (10, 10))
-        # update display
         pg.display.update()
 
         # destruction of aliens that go beyond the playing field
         for alien in aliens:
             if alien.fly_out():
                 alien.kill()
+
+        if is_dead:
+            background.blit(background_imgs[-1], (0, 0))
+            screen.blit(background, (0, 0))
+            text = font.render(f'Your score: {score}', True, 'black')
+            screen.blit(text, (10, 10))
+            pg.display.update()
+            for _ in range(120):
+                clock.tick(FPS)
+            pg.quit()
+            sys.exit()
 
         clock.tick(FPS)
         await asyncio.sleep(0)

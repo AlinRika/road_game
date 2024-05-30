@@ -7,7 +7,7 @@ import pygame as pg
 from pygame.font import Font
 
 from aliens import Alien
-from helper import load_image, collided
+from helper import load_image, collided, calculate_background_index
 from player import Player
 from road import Road
 
@@ -32,7 +32,8 @@ async def main():
 
     # set the display
     background = pg.Surface(screen.get_size()).convert()
-    background_imgs = [load_image("background1.png"), load_image("dead.gif")]
+    background_imgs = [load_image("background1.png"), load_image("background2.png"),
+                       load_image("background3.png"), load_image("dead.gif")]
     background.blit(background_imgs[0], (0, 0))
     screen.fill('black')
 
@@ -98,11 +99,12 @@ async def main():
         # check a collision between a player and an alien
         aliens_collided = pg.sprite.spritecollide(player, aliens,  False, collided)
         if aliens_collided:
-            time.sleep(2)
-            background.blit(background_imgs[1], (0, 0))
+            background.blit(background_imgs[-1], (0, 0))
             screen.blit(background, (0, 0))
+            text = font.render(f'Your score: {score}', True, 'black')
+            screen.blit(text, (10, 10))
             pg.display.update()
-            time.sleep(2)
+            time.sleep(3)
             pg.quit()
             sys.exit()
 
@@ -112,6 +114,8 @@ async def main():
             border_for_score += OFFSET
         if border_for_score > screen.get_width():
             border_for_score = OFFSET
+            background_index = calculate_background_index(score)
+            background.blit(background_imgs[background_index], (0, 0))
 
         # draw the scene
         screen.blit(background, (0, 0))
@@ -120,6 +124,7 @@ async def main():
         # draw the score
         text = font.render(f'Score: {score}', True, 'black')
         screen.blit(text, (10, 10))
+        # update display
         pg.display.update()
 
         # destruction of aliens that go beyond the playing field
